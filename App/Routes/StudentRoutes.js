@@ -2,8 +2,9 @@
 
 const express = require('express')
 const { approveStudents, FindStudentById, deleteStudentById, updateStudent } = require('../Controllers/studentsController')
+const authMiddlewares = require('../middlewares/authMiddleware')
 const studentRoutes = express.Router()
-
+studentRoutes.use(authMiddlewares)
 studentRoutes.put('/approve-student/:id',approveStudents)
 studentRoutes.get('/fetchById-student/:id',FindStudentById)
 studentRoutes.delete('/delete-student/:id',deleteStudentById)

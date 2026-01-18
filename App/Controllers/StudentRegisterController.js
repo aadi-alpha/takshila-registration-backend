@@ -1,5 +1,7 @@
 const upload = require("../../multer")
 let { RegistrationStudentModel } = require("../models/studentRegisterModel")
+const { RollCounterModel } = require('../utils/RollCounterSchema')
+
 let insertImage = async (req, res) => {
   try {
     res.json({
@@ -11,28 +13,24 @@ let insertImage = async (req, res) => {
 
 }
 let insertStudents = async (req, res) => {
-  let studentDet = req.body;
-
 
   try {
-    const existingStudent = await RegistrationStudentModel.findOne({
-      st_aadharNo: studentDet.st_aadharNo
-    });
-    if (existingStudent) {
-      res.status(200).send({
+    const studentDet = req.body;
+    const student = new RegistrationStudentModel(req.body)
+    const registeredData = await student.save()
 
-        message: "This aadhar number already exists",
-      })
-      return
-    }
-    let registeredData = await RegistrationStudentModel.create(studentDet)
     res.status(200).send({
       registeredData,
       message: "Student successfully inserted",
     })
   } catch (error) {
-    res.status(400).send("failed in entering students", error)
+    res.status(400).send({
+      status: 0,
+      message: "failed in entering students",
+      error: error.message
+    })
   }
 }
+
 
 module.exports = { insertStudents, insertImage }

@@ -1,4 +1,5 @@
 let mongoose = require('mongoose')
+const { RollCounterModel } = require('../utils/RollCounterSchema')
 let RegistrationSchema = new mongoose.Schema({
   sessionYear: {
     type: String,
@@ -8,9 +9,19 @@ let RegistrationSchema = new mongoose.Schema({
     type: String,
 
   },
-  centerLoc: {
+  rollNo: {
     type: String,
 
+  },
+  batchId: {
+    type: mongoose.Schema.Types.ObjectId
+  },
+  centerLoc: {
+    type: String,
+    required: true
+  },
+  branchId: {
+    type: mongoose.Schema.Types.ObjectId
   },
   entranceTestDate: {
     type: Date
@@ -44,20 +55,13 @@ let RegistrationSchema = new mongoose.Schema({
     type: String,
 
   },
-  st_bloodGrp: {
-    type: String,
 
-  },
-  st_aadharNo: {
-    type: String,
 
-    unique: true
-  },
   st_whatsappNo: {
     type: String,
 
-  },
 
+  },
   // -------- Parents Details --------
   f_name: {
     type: String,
@@ -146,9 +150,28 @@ let RegistrationSchema = new mongoose.Schema({
 
 },
   {
-    timestamps: true  
+    timestamps: true
   }
 
 )
-const RegistrationStudentModel = mongoose.model('students-Takshila', RegistrationSchema)
+RegistrationSchema.pre('save', async function () {
+  // Skip if rollNo already exists
+  if (this.rollNo) return
+
+  const counter = await RollCounterModel.findOneAndUpdate(
+    { name: 'studentRoll' },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  )
+
+  const branchName = this.centerLoc || 'BRCH'
+  const branchCode = branchName.substring(0, 4).toUpperCase()
+  const count = String(counter.seq).padStart(4, '0')
+
+  this.rollNo = `TAK${branchCode}${count}`
+})
+
+
+
+const RegistrationStudentModel = mongoose.model('studentsTakshila', RegistrationSchema)
 module.exports = { RegistrationStudentModel }
