@@ -3,7 +3,7 @@ const { BranchCreation, AllBranchesGet, GetBranchById, UpdateBranchById } = requ
 const authMiddlewares = require('../middlewares/authMiddleware')
 
 const BranchDetailsFetch = express.Router()
-BranchDetailsFetch.get('/branch-fetch', AllBranchesGet)
+
 
 BranchDetailsFetch.use(authMiddlewares)
 BranchDetailsFetch.post('/branch-insert', BranchCreation)
