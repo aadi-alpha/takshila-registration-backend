@@ -69,9 +69,13 @@ let UserTakshilaLogin = async (req, res) => {
 
         }
     
- 
+         const tokenPayload = {
+            id: user._id.toString(),
+            role: user.role,
+            branchId: user.branchId || null
+        };
 
-        const token = generateToken(user);
+        const token = generateToken(tokenPayload);
         res.status(200).send({
             status: 1,
             message: "Login successful",
