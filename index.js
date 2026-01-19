@@ -20,13 +20,13 @@ let app = express()
 app.use(cors());
 app.use(express.json())
 app.use('/api/web/', NoMiddleWareRoutes)
-
+app.use('/api/web/', UserTakshilaRouter)
 app.use('/api/web/', StudentRegisterRouter)
 app.use('/api/web', BranchDetailsFetch)
 app.use('/api/web/', adminRouter)
 app.use('/api/web/', admStudentFetch)
 app.use('/api/web/', studentRoutes)
-app.use('/api/web/', UserTakshilaRouter)
+
 app.use('/api/web/', SalaryRouter)
 app.use('/api/web/', TestRouter)
 app.use('/api/web/', AttendanceRouter)

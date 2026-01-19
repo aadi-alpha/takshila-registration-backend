@@ -12,9 +12,9 @@ const UserTakshilaRegister = async (req, res) => {
             branch,
             branchId,
             role,
-        TotalSalary } = req.body
+            TotalSalary } = req.body
 
-        let isExist = await UserTakshilaModel.findOne( { $or: [{ mobile }, { email }]})
+        let isExist = await UserTakshilaModel.findOne({ $or: [{ mobile }, { email }] })
         if (isExist) {
             res.status(409).send({
                 message: "user Already Exists",
@@ -32,7 +32,7 @@ const UserTakshilaRegister = async (req, res) => {
             branch: branch,
             branchId: branchId,
             role: role,
-            TotalSalary:TotalSalary
+            TotalSalary: TotalSalary
         })
 
         if (UserTakshilaRes) {
@@ -57,7 +57,7 @@ const UserTakshilaRegister = async (req, res) => {
 let UserTakshilaLogin = async (req, res) => {
     try {
         const { mobile, password } = req.body
-
+        console.log(mobile, password)
         const user = await UserTakshilaModel.findOne({ mobile })
 
         if (!user || user.password !== password) {
@@ -68,6 +68,7 @@ let UserTakshilaLogin = async (req, res) => {
             return
 
         }
+    
         const token = generateToken(user)
         res.status(200).send({
             status: 1,
@@ -76,10 +77,12 @@ let UserTakshilaLogin = async (req, res) => {
             user: {
                 id: user._id,
                 role: user.role,
-                branchId: user.branchId
+                branchId: user.branchId || null
             }
         })
     } catch (error) {
+        const { mobile, password } = req.body
+        console.log(mobile, password)
         res.status(400).send({
             status: 0,
             message: "Server error",
@@ -116,14 +119,14 @@ let UserTakshilaNavId = async (req, res) => {
 const UserTakshilaRolebased = async (req, res) => {
     try {
         let { role, branch } = req.query;
-     
-        
+
+
         let rolesArray = role.split(",");
 
         let AllRoleBasedUsers = await UserTakshilaModel.find({
             role: { $in: rolesArray.map(r => new RegExp(`^${r}$`, 'i')) },
 
-            ...(branch && { branchId: branch }) 
+            ...(branch && { branchId: branch })
         });
 
         if (AllRoleBasedUsers.length > 0) {
