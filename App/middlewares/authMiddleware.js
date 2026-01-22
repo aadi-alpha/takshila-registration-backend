@@ -1,20 +1,28 @@
 const jwt = require("jsonwebtoken")
 
 const authMiddlewares = (req, res, next) => {
-  let token = req.headers.authorization
+  const authHeader = req.headers.authorization
 
-  if (!token || !token.startsWith("Bearer")) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).send({ message: "Not authorized" })
   }
 
   try {
-    token = token.split(" ")[1]
+    const token = authHeader.split(" ")[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = decoded  // { id, role } – you can ignore role if you want
+    
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      branchId: decoded.branchId
+    }
+    
+
     next()
   } catch (error) {
-    res.status(401).send({ message: "Token invalid" })
+    return res.status(401).send({ message: "Token invalid" })
   }
 }
 
-module.exports =authMiddlewares
+module.exports = authMiddlewares

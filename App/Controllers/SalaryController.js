@@ -2,7 +2,8 @@ const { salaryModel } = require("../models/SalaryModel")
 
 const InsertSalary = async (req, res) => {
     try {
-        let { name, branchId, userId, role, TotalSalary, paidAmount,month } = req.body
+        let { name,  userId, role, TotalSalary, paidAmount,month } = req.body
+           const branchId = req.user.branchId
         
         if (name, branchId, userId, role, TotalSalary, paidAmount,month) {
             let registeredSalary = salaryModel.create({
@@ -92,7 +93,7 @@ const getSalaryById = async (req, res) => {
       SalaryTakshila,
     });
   } catch (error) {
-    console.error(error);
+    
     res.status(500).send({
       status: 0,
       message: "Unable to fetch salary at the moment",
@@ -153,7 +154,7 @@ const UpdateSalary = async (req, res) => {
       updatedSalary,
     });
   } catch (error) {
-    console.error(error);
+    
     res.status(500).send({
       status: 0,
       message: "Unable to update salary at the moment",

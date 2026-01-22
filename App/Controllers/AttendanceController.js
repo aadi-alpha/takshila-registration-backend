@@ -43,7 +43,7 @@ const insertAttendance = async (req, res) => {
       data: insertedRecords,
     });
   } catch (error) {
-    console.error("Error saving attendance:", error);
+    
     res.status(500).json({ message: "Failed to save attendance", error: error.message });
   }
 };
@@ -52,7 +52,8 @@ const insertAttendance = async (req, res) => {
 
 const fetchAttendance = async (req, res) => {
   try {
-    const { branchId, batchId, studentId, subject, month, year } = req.query;
+    const {  batchId, studentId, subject, month, year } = req.query;
+       const branchId = req.user.branchId
 
     if (!branchId || !batchId || !subject || !month || !year) {
       return res.status(400).json({
@@ -89,7 +90,7 @@ const fetchAttendance = async (req, res) => {
 
     res.status(200).json({ attendance: attendanceRecords });
   } catch (error) {
-    console.error("Error fetching attendance:", error);
+    
     res.status(500).json({
       message: "Failed to fetch attendance",
       error: error.message,

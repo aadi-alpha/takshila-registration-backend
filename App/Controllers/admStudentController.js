@@ -3,7 +3,7 @@ const { CountStudentsByBranch } = require("../utils/StudentCountByBranch");
 
 const findStudentsBatch = async (req, res) => {
     try {
-        const { BranchId } = req.params;
+        const BranchId = req.user.branchId
         const { batch, search, paymentFilter } = req.query;
 
         const page = Number(req.query.page) || 1;
@@ -81,7 +81,8 @@ const findStudentsBatch = async (req, res) => {
 };
 const findStudentsForTests = async (req, res) => {
     try {
-        const { branchId, batchId, subject } = req.query;
+        const {  batchId, subject } = req.query;
+           const branchId = req.user.branchId
 
         const students = await RegistrationStudentModel.find({
             branchId,
@@ -106,7 +107,8 @@ const findStudentsForTests = async (req, res) => {
 }
 const getStudentsNamesByBatch = async (req, res) => {
     try {
-        const { branchId, batchId } = req.query;
+        const {  batchId } = req.query;
+           const branchId = req.user.branchId
 
         if (!branchId || !batchId) {
             return res.status(400).json({
@@ -146,14 +148,14 @@ const getStudentsNamesByBatch = async (req, res) => {
 const fetchStudentByBranch = async (req, res) => {
     try {
         const { branchId } = req.query
-     
+
         if (!branchId) {
             return res.status(404).send({
                 status: 0,
                 message: "Branch Id is required field"
             })
         }
-        const allStudents =await RegistrationStudentModel.find({ branchId }).select("st_firstName st_lastName rollNo")
+        const allStudents = await RegistrationStudentModel.find({ branchId }).select("st_firstName st_lastName rollNo")
         if (!allStudents) {
             return res.status(400).send({
                 status: 0,
@@ -175,4 +177,4 @@ const fetchStudentByBranch = async (req, res) => {
 }
 
 
-module.exports = { findStudentsBatch, findStudentsForTests, getStudentsNamesByBatch,fetchStudentByBranch }
+module.exports = { findStudentsBatch, findStudentsForTests, getStudentsNamesByBatch, fetchStudentByBranch }

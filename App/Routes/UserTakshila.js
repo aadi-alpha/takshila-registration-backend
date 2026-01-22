@@ -1,19 +1,15 @@
 // all routes of UserTakshila insert , login , update(forgotten password)
 const express = require('express')
-const { UserTakshilaRegister,  UserTakshilaNavId, UserTakshilaRolebased, DeleteUserTakshila, updateUser } = require('../Controllers/UserTakshila')
+const { UserTakshilaRegister, UserTakshilaNavId, UserTakshilaRolebased, DeleteUserTakshila, updateUser } = require('../Controllers/UserTakshila')
 const authMiddlewares = require('../middlewares/authMiddleware')
+const { allowRoles } = require('../middlewares/allowedRoles')
 
 const UserTakshilaRouter = express.Router()
-
-
-
-UserTakshilaRouter.put('/UserTakshila-update/:id', updateUser)
-UserTakshilaRouter.post('/UserTakshila-insert', UserTakshilaRegister)
-
-UserTakshilaRouter.get('/UserTakshila-fetch-id/:id', UserTakshilaNavId)
-UserTakshilaRouter.use(authMiddlewares)
-UserTakshilaRouter.get('/role-based-users', UserTakshilaRolebased)
-UserTakshilaRouter.delete('/delete-user-takshila/:id', DeleteUserTakshila)
+UserTakshilaRouter.put('/UserTakshila-update/:id', allowRoles('admin', "superAdmin"), updateUser)
+UserTakshilaRouter.post('/UserTakshila-insert',authMiddlewares, allowRoles('admin', "receptionist", "superAdmin"), UserTakshilaRegister)
+UserTakshilaRouter.get('/UserTakshila-fetch-id/:id', authMiddlewares, allowRoles('admin', "receptionist", "superAdmin"), UserTakshilaNavId)
+UserTakshilaRouter.get('/role-based-users', authMiddlewares, allowRoles('admin', "superAdmin"), UserTakshilaRolebased)
+UserTakshilaRouter.delete('/delete-user-takshila/:id', authMiddlewares, allowRoles('admin',"superAdmin"), DeleteUserTakshila)
 
 
 

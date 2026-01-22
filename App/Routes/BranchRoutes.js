@@ -1,14 +1,15 @@
 const express =require('express')
 const { BranchCreation, AllBranchesGet, GetBranchById, UpdateBranchById } = require('../Controllers/BranchController')
 const authMiddlewares = require('../middlewares/authMiddleware')
+const { allowRoles } = require('../middlewares/allowedRoles')
 
 const BranchDetailsFetch = express.Router()
 
 
-BranchDetailsFetch.use(authMiddlewares)
-BranchDetailsFetch.post('/branch-insert', BranchCreation)
-BranchDetailsFetch.put('/update-branch/:id',UpdateBranchById)
-BranchDetailsFetch.get('/branch-get-ById/:id',GetBranchById)
+
+BranchDetailsFetch.post('/branch-insert',authMiddlewares, allowRoles("superAdmin"), BranchCreation)
+BranchDetailsFetch.put('/update-branch/:id',authMiddlewares, allowRoles("superAdmin"),UpdateBranchById)
+BranchDetailsFetch.get('/branch-get-ById/:id',authMiddlewares, allowRoles("superAdmin","admin","receptionist"), GetBranchById)
 
 
 module.exports={BranchDetailsFetch}

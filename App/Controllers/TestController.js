@@ -24,7 +24,7 @@ const testInsert = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error)
+
         res.status(400).send({
             status: 0,
             message: "can not insert data at the moment"
@@ -33,7 +33,8 @@ const testInsert = async (req, res) => {
 }
 const getTestsRecordForDropDown = async (req, res) => {
     try {
-        let { batchId, branchId } = req.query
+        let { batchId } = req.query
+           const branchId = req.user.branchId
         if (!batchId || !branchId) {
             return res.status(400).send({
                 status: 0,
@@ -66,7 +67,8 @@ const getTestsRecordForDropDown = async (req, res) => {
 
 const viewTests = async (req, res) => {
     try {
-        const { branchId, batchId, testId, studentId } = req.query;
+        const {  batchId, testId, studentId } = req.query;
+           const branchId = req.user.branchId
 
         // Validate ObjectId
         if (!branchId || !batchId) {
@@ -155,7 +157,7 @@ const viewTests = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("View Tests Error:", error);
+        
         res.status(500).json({
             message: "Server error while fetching tests",
         });

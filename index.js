@@ -2,7 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const { StudentRegisterRouter } = require('./App/Routes/RegistrationRoutes')
-const { adminRouter } = require('./App/Routes/adminRoutes')
+
 const { admStudentFetch } = require('./App/Routes/admStudentsRoutes')
 const { studentRoutes } = require('./App/Routes/StudentRoutes')
 const { UserTakshilaRouter } = require('./App/Routes/UserTakshila')
@@ -23,7 +23,7 @@ app.use('/api/web/', NoMiddleWareRoutes)
 app.use('/api/web/', UserTakshilaRouter)
 app.use('/api/web/', StudentRegisterRouter)
 app.use('/api/web', BranchDetailsFetch)
-app.use('/api/web/', adminRouter)
+
 app.use('/api/web/', admStudentFetch)
 app.use('/api/web/', studentRoutes)
 

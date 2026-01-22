@@ -57,11 +57,11 @@ const UserTakshilaRegister = async (req, res) => {
 let UserTakshilaLogin = async (req, res) => {
     try {
         const { mobile, password } = req.body
-        console.log(mobile, password)
+  
         const user = await UserTakshilaModel.findOne({ mobile })
 
         if (!user || user.password !== password) {
-            res.status(200).send({
+            res.status(401).send({
                 status: 0,
                 message: "Invalid credentials"
             })
@@ -74,6 +74,7 @@ let UserTakshilaLogin = async (req, res) => {
             role: user.role,
             branchId: user.branchId || null
         };
+        
 
         const token = generateToken(tokenPayload);
         res.status(200).send({
@@ -87,8 +88,7 @@ let UserTakshilaLogin = async (req, res) => {
             }
         })
     } catch (error) {
-        const { mobile, password } = req.body
-        console.log(mobile, password)
+
         res.status(400).send({
             status: 0,
             message: "Server error",
@@ -124,7 +124,8 @@ let UserTakshilaNavId = async (req, res) => {
 // fetch users by role (admin,receptionists,teachers)
 const UserTakshilaRolebased = async (req, res) => {
     try {
-        let { role, branch } = req.query;
+        let { role } = req.query;
+       const branch = req.user.branchId
 
 
         let rolesArray = role.split(",");

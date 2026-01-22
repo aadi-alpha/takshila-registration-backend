@@ -12,18 +12,13 @@ const insertFees = async (req, res) => {
             studentId,
             name,
             studentRollNo,
-            branchId,
+
             TotalFees,
             paidAmount,
             month, year
         } = req.body;
-        console.log(studentId,
-            name,
-            studentRollNo,
-            branchId,
-            TotalFees,
-            paidAmount,
-            month, year)
+           const branchId = req.user.branchId
+
 
         /* ================= VALIDATION ================= */
 
@@ -82,7 +77,7 @@ const insertFees = async (req, res) => {
             data: newFees,
         });
     } catch (error) {
-        console.error("Insert Fees Error:", error);
+
 
         return res.status(500).json({
             success: false,
@@ -118,7 +113,7 @@ const fetchFeesByStudentId = async (req, res) => {
             data: feesData,
         });
     } catch (error) {
-        console.error("Fetch Fees By Student Error:", error);
+
 
         return res.status(500).json({
             success: false,
@@ -135,7 +130,7 @@ const fetchFeesRecordById = async (req, res) => {
     }
     return res.status(200).json({ success: true, data: feesRecord });
   } catch (error) {
-    console.error("Error fetching fees by ID:", error);
+
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -177,7 +172,7 @@ const updatefeesbyid = async (req, res) => {
       data: feesRecord
     });
   } catch (error) {
-    console.error("Error updating fees:", error);
+    
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
