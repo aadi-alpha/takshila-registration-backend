@@ -12,6 +12,7 @@ const SalaryRouter = require('./App/Routes/SalaryRoutes')
 const TestRouter = require('./App/Routes/TestRoutes')
 const { AttendanceRouter } = require('./App/Routes/AttendanceRoutes')
 const { FeesRouter } = require('./App/Routes/FeesRouter')
+const { batchRoutes } = require('./App/Routes/BatchRoutes')
 
 require('dotenv').config()
 
@@ -23,10 +24,9 @@ app.use('/api/web/', NoMiddleWareRoutes)
 app.use('/api/web/', UserTakshilaRouter)
 app.use('/api/web/', StudentRegisterRouter)
 app.use('/api/web', BranchDetailsFetch)
-
 app.use('/api/web/', admStudentFetch)
 app.use('/api/web/', studentRoutes)
-
+app.use('/api/web/', batchRoutes)
 app.use('/api/web/', SalaryRouter)
 app.use('/api/web/', TestRouter)
 app.use('/api/web/', AttendanceRouter)

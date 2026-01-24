@@ -32,6 +32,7 @@ let CreateBatch = async (req, res) => {
 let BatchFetch = async (req, res) => {
     try {
         let AllBatches = await BatchModel.find()
+        
         if (AllBatches.length === 0) {
             return res.status(404).send({
                 status: 0,
