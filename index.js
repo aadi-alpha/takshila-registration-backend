@@ -20,7 +20,7 @@ require('dotenv').config()
 let app = express()
 app.use(cors({
   origin: [
-    "http://localhost:5173"
+    "https://takshila-registration.web.app"
 
   ],
   credentials: true,
