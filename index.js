@@ -20,27 +20,18 @@ const { batchRoutes } = require('./App/Routes/BatchRoutes');
 const app = express();
 
 // ✅ CORS configuration (Railway-safe)
-const allowedOrigins = [
-  "https://takshila-registration.web.app",
-  "http://localhost:5173"
-];
-
 const corsOptions = {
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser requests like Postman
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed"));
-    }
-  },
+  origin: [
+    "https://takshila-registration.web.app", // production frontend
+    "http://localhost:5173"                  // dev frontend
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// Apply CORS globally
 app.use(cors(corsOptions));
-
 app.use(express.json());
 
 // Optional: handle preflight per route (safe alternative to app.options("*"))
