@@ -1,8 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const { StudentRegisterRouter } = require('./App/Routes/RegistrationRoutes')
 
+const { StudentRegisterRouter } = require('./App/Routes/RegistrationRoutes')
 const { admStudentFetch } = require('./App/Routes/admStudentsRoutes')
 const { studentRoutes } = require('./App/Routes/StudentRoutes')
 const { UserTakshilaRouter } = require('./App/Routes/UserTakshila')
@@ -16,20 +16,27 @@ const { batchRoutes } = require('./App/Routes/BatchRoutes')
 
 require('dotenv').config()
 
+const app = express()
 
-let app = express()
-app.use(cors({
+// ✅ CORS configuration
+const corsOptions = {
   origin: [
-    "https://takshila-registration.web.app"
-
+    "https://takshila-registration.web.app", // frontend prod
+    "http://localhost:5173"                  // frontend dev
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-})); 
+}
 
-
+// 🔹 Must come BEFORE routes
+app.use(cors(corsOptions))
 app.use(express.json())
+
+// 🔹 Optional: explicitly respond to preflight requests
+app.options("/api/web/*", cors(corsOptions))
+
+// ROUTES
 app.use('/api/web/', NoMiddleWareRoutes)
 app.use('/api/web/', UserTakshilaRouter)
 app.use('/api/web/', StudentRegisterRouter)
@@ -42,15 +49,16 @@ app.use('/api/web/', TestRouter)
 app.use('/api/web/', AttendanceRouter)
 app.use('/api/web/', FeesRouter)
 
-
+// GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
     console.error(err)
     res.status(500).json({ message: "Something went wrong" })
 })
 
+// DATABASE + SERVER
 mongoose.connect(process.env.DBURL).then(() => {
-    console.log('server successfully running')
+    console.log('MongoDB connected')
     app.listen(process.env.PORT || 8000, () => {
-        console.log("sever successfully running...")
+        console.log("Server running...")
     })
 })
