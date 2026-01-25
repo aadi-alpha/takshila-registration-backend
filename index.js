@@ -18,7 +18,18 @@ require('dotenv').config()
 
 
 let app = express()
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "https://takshila-registration-backend-production.up.railway.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+}));
+
+app.options("*", cors()); // 🔥 VERY IMPORTANT
+cd
 app.use(express.json())
 app.use('/api/web/', NoMiddleWareRoutes)
 app.use('/api/web/', UserTakshilaRouter)
