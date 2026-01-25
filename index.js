@@ -34,7 +34,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 // 🔹 Optional: explicitly respond to preflight requests
-app.options("/api/web/*", cors(corsOptions))
+
 
 // ROUTES
 app.use('/api/web/', NoMiddleWareRoutes)
