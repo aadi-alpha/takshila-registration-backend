@@ -28,6 +28,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 })); // 🔥 VERY IMPORTANT
 
+app.options("*", cors());
 app.use(express.json())
 app.use('/api/web/', NoMiddleWareRoutes)
 app.use('/api/web/', UserTakshilaRouter)
