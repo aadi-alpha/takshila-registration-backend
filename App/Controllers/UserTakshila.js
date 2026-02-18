@@ -194,6 +194,7 @@ let updateUser = async (req, res) => {
         let { id } = req.params
 
         const updatableData = req.body
+   
 
         const UserUpdate = await UserTakshilaModel.findOneAndUpdate({ _id: id }, { $set: updatableData }, { new: true })
         if (!UserUpdate) {

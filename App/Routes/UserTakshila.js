@@ -5,7 +5,7 @@ const authMiddlewares = require('../middlewares/authMiddleware')
 const { allowRoles } = require('../middlewares/allowedRoles')
 
 const UserTakshilaRouter = express.Router()
-UserTakshilaRouter.put('/UserTakshila-update/:id', allowRoles('admin', "superAdmin"), updateUser)
+UserTakshilaRouter.put('/UserTakshila-update/:id',authMiddlewares, allowRoles('admin', "superAdmin"), updateUser)
 UserTakshilaRouter.post('/UserTakshila-insert',authMiddlewares, allowRoles('admin', "receptionist", "superAdmin"), UserTakshilaRegister)
 UserTakshilaRouter.get('/UserTakshila-fetch-id/:id', authMiddlewares, allowRoles('admin', "receptionist", "superAdmin"), UserTakshilaNavId)
 UserTakshilaRouter.get('/role-based-users', authMiddlewares, allowRoles('admin', "superAdmin"), UserTakshilaRolebased)
