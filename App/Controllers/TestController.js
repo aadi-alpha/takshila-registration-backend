@@ -3,38 +3,81 @@ const mongoose = require("mongoose");
 
 
 const testInsert = async (req, res) => {
+  try {
+    const {
+      branchId,
+      batchId,
+      subject,
+      chapterName,
+      testDate,
+      maxMarks,
+      marks
+    } = req.body;
 
+    // normalize date (VERY IMPORTANT)
+    const normalizedDate = new Date(testDate);
+    normalizedDate.setHours(0, 0, 0, 0);
 
-    try {
-        const payload = req.body;
+    // 1️⃣ Find test first
+    let test = await TestModel.findOne({
+      branchId,
+      batchId,
+      subject,
+      testDate: normalizedDate
+    });
 
-        let testRes = await TestModel.create(payload)
-
-        if (testRes) {
-            res.status(200).send({
-                status: 1,
-                message: "test successfully inserted",
-                testRes
-            })
-        } else {
-            res.status(409).send({
-                status: 0,
-                message: "Please fill required fields"
-            })
-        }
-
-    } catch (error) {
-
-        res.status(400).send({
-            status: 0,
-            message: "can not insert data at the moment"
-        })
+    // 2️⃣ If test not found → create ONCE
+    if (!test) {
+      test = await TestModel.create({
+        branchId,
+        batchId,
+        subject,
+        chapterName,
+        testDate: normalizedDate,
+        maxMarks,
+        marks: []
+      });
     }
-}
+
+    // 3️⃣ Insert / Update marks (NO DUPLICATE STUDENT)
+    const incomingMark = marks[0]; // one student at a time
+
+    const studentIndex = test.marks.findIndex(
+      m => m.userId === incomingMark.userId
+    );
+
+    if (studentIndex !== -1) {
+      // update marks
+      test.marks[studentIndex].obtainedMarks =
+        incomingMark.obtainedMarks;
+    } else {
+      // insert marks
+      test.marks.push(incomingMark);
+    }
+
+    await test.save();
+
+    res.status(200).send({
+      status: 1,
+      message: "Marks saved successfully",
+      test
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      status: 0,
+      message: "Unable to save test marks"
+    });
+  }
+};
+
+
+
 const getTestsRecordForDropDown = async (req, res) => {
     try {
         let { batchId } = req.query
-           const branchId = req.user.branchId
+        const branchId = req.user.branchId
         if (!batchId || !branchId) {
             return res.status(400).send({
                 status: 0,
@@ -67,8 +110,8 @@ const getTestsRecordForDropDown = async (req, res) => {
 
 const viewTests = async (req, res) => {
     try {
-        const {  batchId, testId, studentId } = req.query;
-           const branchId = req.user.branchId
+        const { batchId, testId, studentId } = req.query;
+        const branchId = req.user.branchId
 
         // Validate ObjectId
         if (!branchId || !batchId) {
@@ -106,10 +149,10 @@ const viewTests = async (req, res) => {
                     );
 
                     if (!studentMark) return null;
-                 
+
                     return {
                         testId: test._id,
-                        rollNo:studentMark.userId,
+                        rollNo: studentMark.userId,
                         subject: test.subject,
                         chapterName: test.chapterName,
                         testDate: test.testDate,
@@ -157,11 +200,51 @@ const viewTests = async (req, res) => {
         });
 
     } catch (error) {
-        
+
         res.status(500).json({
             message: "Server error while fetching tests",
         });
     }
 };
+const updateTests = async (req, res) => {
+    try {
+        const { testId, marks } = req.body;
 
-module.exports = { testInsert, getTestsRecordForDropDown, viewTests }
+        // 1️⃣ Validate input
+        if (!testId || !marks || !Array.isArray(marks)) {
+            return res.status(400).json({ message: 'Invalid payload' });
+        }
+
+        // 2️⃣ Find the test
+        const test = await TestModel.findById(testId);
+        if (!test) {
+            return res.status(404).json({ message: 'Test not found' });
+        }
+
+        // 3️⃣ Update marks
+        const updatedMarks = test.marks.map((studentMark) => {
+            const newMark = marks.find((m) => m.userId === studentMark.userId);
+            if (newMark) {
+                // Validate obtainedMarks
+                const obtained = Number(newMark.obtainedMarks);
+                if (isNaN(obtained) || obtained < 0 || obtained > test.maxMarks) {
+                    throw new Error(`Invalid marks for student ${studentMark.userId}`);
+                }
+                return { ...studentMark._doc, obtainedMarks: obtained };
+            }
+            return studentMark;
+        });
+
+        test.marks = updatedMarks;
+
+        // 4️⃣ Save
+        const updatedTest = await test.save();
+
+        res.status(200).json({ message: 'Test updated successfully', updatedTest });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to update test', error: err.message });
+    }
+}
+
+module.exports = { testInsert, getTestsRecordForDropDown, viewTests, updateTests }

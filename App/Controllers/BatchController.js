@@ -32,7 +32,7 @@ let CreateBatch = async (req, res) => {
 let BatchFetch = async (req, res) => {
     try {
         let AllBatches = await BatchModel.find()
-        
+
         if (AllBatches.length === 0) {
             return res.status(404).send({
                 status: 0,
@@ -52,4 +52,27 @@ let BatchFetch = async (req, res) => {
         })
     }
 }
-module.exports = { CreateBatch, BatchFetch }
+let batchDelete = async (req, res) => {
+    try {
+        const { BatchId } = req.params;
+        
+        const delRes =await BatchModel.findOneAndDelete({ _id: BatchId })
+      
+        if (!delRes) {
+            return res.status(404).send({
+                status: 0,
+                message: "Can not found batch"
+
+            })
+        }
+        res.status(200).send({
+            status: 1,
+            message: "Batch deleted successfully",
+
+        })
+    } catch (error) {
+        console.error(error)
+    }
+
+}
+module.exports = { CreateBatch, BatchFetch, batchDelete }

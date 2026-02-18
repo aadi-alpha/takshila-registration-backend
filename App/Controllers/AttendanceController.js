@@ -1,7 +1,7 @@
- // adjust path if needed
+// adjust path if needed
 
 const AttendanceModel = require("../models/AttendanceModel");
-const mongoose  = require('mongoose')
+const mongoose = require('mongoose')
 // POST /attendance-insert
 const insertAttendance = async (req, res) => {
   try {
@@ -43,7 +43,7 @@ const insertAttendance = async (req, res) => {
       data: insertedRecords,
     });
   } catch (error) {
-    
+
     res.status(500).json({ message: "Failed to save attendance", error: error.message });
   }
 };
@@ -52,8 +52,8 @@ const insertAttendance = async (req, res) => {
 
 const fetchAttendance = async (req, res) => {
   try {
-    const {  batchId, studentId, subject, month, year } = req.query;
-       const branchId = req.user.branchId
+    const { batchId, studentId, subject, month, year } = req.query;
+    const branchId = req.user.branchId
 
     if (!branchId || !batchId || !subject || !month || !year) {
       return res.status(400).json({
@@ -90,10 +90,66 @@ const fetchAttendance = async (req, res) => {
 
     res.status(200).json({ attendance: attendanceRecords });
   } catch (error) {
-    
+
     res.status(500).json({
       message: "Failed to fetch attendance",
       error: error.message,
+    });
+  }
+};
+const updateAttendance = async (req, res) => {
+  try {
+    const branchId = req.user.branchId;
+    const { studentId, date, status, subject } = req.body;
+
+    if (!studentId || !date || !status || !subject) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    if (!["P", "A", "L"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid attendance status",
+      });
+    }
+
+    // Normalize date
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const existingAttendance = await AttendanceModel.findOne({
+      StudentId: new mongoose.Types.ObjectId(studentId),
+      BranchId: new mongoose.Types.ObjectId(branchId),
+      subject: subject.toLowerCase(),
+      Date: { $gte: start, $lte: end },
+    });
+
+    if (!existingAttendance) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendance record not found",
+      });
+    }
+
+    existingAttendance.status = status;
+    await existingAttendance.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Attendance updated successfully",
+      attendance: existingAttendance,
+    });
+  } catch (error) {
+    console.error("Update Attendance Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating attendance",
     });
   }
 };
@@ -101,4 +157,5 @@ const fetchAttendance = async (req, res) => {
 
 
 
-module.exports = { insertAttendance,fetchAttendance };
+
+module.exports = { insertAttendance, fetchAttendance, updateAttendance };

@@ -28,21 +28,22 @@ const feesSchema = new mongoose.Schema(
         },
 
         // ================= FEES DETAILS =================
-        month: {
-            type: String,
-            required: true,
-            lowercase: true, // january, february
-        },
 
-        year: {
-            type: Number,
-            required: true,
-        },
 
-        totalFees: {
+        //  fromDate: '',
+        // toDate: '',
+        // duration: ''
+        fromDate: {
+            type: Date,
+            required: true
+        },
+        toDate: {
+            type: Date,
+            required: true
+        },
+        duration: {
             type: Number,
-            required: true,
-            min: 0,
+            required: true
         },
 
         paidAmount: {
@@ -50,19 +51,11 @@ const feesSchema = new mongoose.Schema(
             default: 0,
             min: 0,
         },
-        year: {
-            type: Number
-        },
 
-        dueAmount: {
-            type: Number,
-            default: function () {
-                return this.totalFees - this.paidAmount;
-            }
-        }
+
     },
     { timestamps: true }
 );
 
 const FeesModel = mongoose.model("FeesTakshilaStudents", feesSchema);
-module.exports = {FeesModel}
+module.exports = { FeesModel }

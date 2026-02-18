@@ -12,62 +12,58 @@ const insertFees = async (req, res) => {
             studentId,
             name,
             studentRollNo,
-
-            TotalFees,
+            toDate,
+            fromDate,
+            duration,
             paidAmount,
-            month, year
         } = req.body;
-           const branchId = req.user.branchId
 
+        const branchId = req.user?.branchId;
 
         /* ================= VALIDATION ================= */
 
-        if (
-            !studentId ||
-            !name ||
-            !studentRollNo ||
-            !branchId ||
-            !TotalFees ||
-            !month ||
-            !year
-        ) {
+        if (!studentId || !name || !studentRollNo || !branchId || !toDate || !fromDate || !duration) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing",
             });
         }
 
+        if (paidAmount && paidAmount < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Paid amount cannot be negative",
+            });
+        }
+
         /* ================= DUPLICATE CHECK ================= */
-        // Prevent duplicate fees entry for same student + month + year
 
         const alreadyExists = await FeesModel.findOne({
             studentId,
-            month: month.toLowerCase(),
-            year
+            branchId,
+            fromDate,
+            toDate,
         });
 
         if (alreadyExists) {
             return res.status(409).json({
                 success: false,
-                message: "Fees already added for this month",
+                message: "Fees already added for this duration",
             });
         }
 
-        /* ================= CREATE FEES DOCUMENT ================= */
+        /* ================= CREATE ================= */
 
         const newFees = new FeesModel({
             studentId,
             studentName: name,
             studentRollNo,
             branchId,
-            totalFees: Number(TotalFees),
-            paidAmount: Number(paidAmount || 0),
-            month: month.toLowerCase(),
-            year
-
+            fromDate,
+            toDate,
+            duration,
+            paidAmount: Number(paidAmount) || 0,
         });
-
-        /* ================= SAVE ================= */
 
         await newFees.save();
 
@@ -76,8 +72,9 @@ const insertFees = async (req, res) => {
             message: "Fees inserted successfully",
             data: newFees,
         });
-    } catch (error) {
 
+    } catch (error) {
+        console.error("Insert Fees Error:", error);
 
         return res.status(500).json({
             success: false,
@@ -122,60 +119,60 @@ const fetchFeesByStudentId = async (req, res) => {
     }
 };
 const fetchFeesRecordById = async (req, res) => {
-  try {
-    const feesId = req.params.id;
-    const feesRecord = await FeesModel.findById(feesId);
-    if (!feesRecord) {
-      return res.status(404).json({ success: false, message: "Fees record not found" });
-    }
-    return res.status(200).json({ success: true, data: feesRecord });
-  } catch (error) {
+    try {
+        const feesId = req.params.id;
+        const feesRecord = await FeesModel.findById(feesId);
+        if (!feesRecord) {
+            return res.status(404).json({ success: false, message: "Fees record not found" });
+        }
+        return res.status(200).json({ success: true, data: feesRecord });
+    } catch (error) {
 
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
 };
 
 
 
 const updatefeesbyid = async (req, res) => {
-  try {
-    const feesId = req.params.id;
-    const { paidAmount } = req.body;
+    try {
+        const feesId = req.params.id;
+        const { paidAmount } = req.body;
 
-    if (!paidAmount || paidAmount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid payment amount" });
+        if (!paidAmount || paidAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid payment amount" });
+        }
+
+        // Fetch the fees record
+        const feesRecord = await FeesModel.findById(feesId);
+        if (!feesRecord) {
+            return res.status(404).json({ success: false, message: "Fees record not found" });
+        }
+
+        const newPaidAmount = feesRecord.paidAmount + Number(paidAmount);
+        if (newPaidAmount > feesRecord.totalFees) {
+            return res.status(400).json({
+                success: false,
+                message: `Payment exceeds total fees. Maximum payable: ${feesRecord.totalFees - feesRecord.paidAmount}`
+            });
+        }
+
+        // Update paidAmount and dueAmount
+        feesRecord.paidAmount = newPaidAmount;
+        feesRecord.dueAmount = feesRecord.totalFees - newPaidAmount;
+
+        await feesRecord.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment updated successfully",
+            data: feesRecord
+        });
+    } catch (error) {
+
+        return res.status(500).json({ success: false, message: "Internal server error" });
     }
-
-    // Fetch the fees record
-    const feesRecord = await FeesModel.findById(feesId);
-    if (!feesRecord) {
-      return res.status(404).json({ success: false, message: "Fees record not found" });
-    }
-
-    const newPaidAmount = feesRecord.paidAmount + Number(paidAmount);
-    if (newPaidAmount > feesRecord.totalFees) {
-      return res.status(400).json({
-        success: false,
-        message: `Payment exceeds total fees. Maximum payable: ${feesRecord.totalFees - feesRecord.paidAmount}`
-      });
-    }
-
-    // Update paidAmount and dueAmount
-    feesRecord.paidAmount = newPaidAmount;
-    feesRecord.dueAmount = feesRecord.totalFees - newPaidAmount;
-
-    await feesRecord.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Payment updated successfully",
-      data: feesRecord
-    });
-  } catch (error) {
-    
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
 };
 module.exports = {
-    insertFees, fetchFeesByStudentId,updatefeesbyid,fetchFeesRecordById
+    insertFees, fetchFeesByStudentId, updatefeesbyid, fetchFeesRecordById
 };

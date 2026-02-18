@@ -19,10 +19,12 @@ const testSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    chapterName: {
-      type: String
 
+    chapterName: {
+      type: String,
+      trim: true
     },
+
     testDate: {
       type: Date,
       required: true,
@@ -31,23 +33,13 @@ const testSchema = new mongoose.Schema(
     maxMarks: {
       type: Number,
       required: true,
-
     },
 
     marks: [
       {
-        userId: {
-          type: String,
-
-          required: true,
-        },
-        userName: {
-          type: String,
-        },
-        userF_name: {
-          type: String
-        },
-
+        userId: { type: String, required: true },
+        userName: String,
+        userF_name: String,
         obtainedMarks: {
           type: Number,
           required: true,
@@ -58,6 +50,7 @@ const testSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 
 let TestModel = mongoose.model("TestsTakshila", testSchema);
 module.exports = TestModel
